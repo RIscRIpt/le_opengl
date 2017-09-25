@@ -16,8 +16,11 @@
 #include <pcl/octree/octree.h>
 #include <pcl/octree/octree_impl.h>
 
+//#include <GL/glew.h>
 #include <GL/gl.h>
-#include <GL/glut.h>
+#include <GL/glext.h>
+//#include <GL/glut.h>
+#include <GL/freeglut.h> //glut.h extension for fonts
 
 using namespace std;
 
@@ -31,6 +34,21 @@ constexpr float WIDTH = RIGHT - LEFT;
 constexpr float HEIGHT = TOP - BOTTOM;
 
 constexpr double OPC_RESOLUTION = WIDTH / 10000.0;
+
+enum class mode {
+    bezier,
+    bspline,
+    clipping,
+    count,
+};
+
+const char *szmode[(int)mode::count] = {
+    "Bezier",
+    "B-spline",
+    "Clipping",
+};
+
+mode current_mode;
 
 float REAL_WIDTH;
 float REAL_HEIGHT;
@@ -138,10 +156,16 @@ void display() {
                 glEvalCoord1f(percent);
             }
         glEnd();
+        //glMapGrid1f(curve_points, 0.0, 1.0);
+        //glEvalMesh1(GL_POINT, 0, curve_points);
     }
     glDisable(GL_MAP1_VERTEX_3);
     glDisable(GL_LINE_SMOOTH);
     glDisable(GL_BLEND);
+
+    glRasterPos2f(-0.75, 0.75);
+    glColor3f(0, 0, 0);
+    glutBitmapString(GLUT_BITMAP_9_BY_15, (const unsigned char*)"Mode: WORLD");
 
     glFlush();
 }
@@ -278,6 +302,8 @@ void keyboard(unsigned char key, int x, int y) {
 
 int main(int argc, char *argv[]) {
     pointTree.setInputCloud(pointCloud, pointIndicies);
+
+    //glewInit();
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
